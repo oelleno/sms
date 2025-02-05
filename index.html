@@ -54,6 +54,7 @@
                             </div>
                             <div class="form-text">국가 번호를 제외한 전화번호를 입력하세요</div>
                             <button id="send-code" class="btn btn-primary mt-3 w-100">인증번호 전송</button>
+                            <div id="recaptcha-container" class="d-none"></div> <!-- reCAPTCHA 컨테이너 -->
                         </div>
 
                         <!-- 인증번호 입력 -->
@@ -135,8 +136,8 @@
                 toggleLoading(true);
                 const formattedPhone = `+82${phone}`;
 
-                const appVerifier = new firebase.auth.RecaptchaVerifier('send-code', {
-                    size: 'invisible',
+                const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    size: 'invisible', // 보이지 않는 reCAPTCHA
                     callback: () => {
                         // reCAPTCHA 완료
                     }
