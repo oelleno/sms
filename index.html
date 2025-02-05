@@ -1,122 +1,211 @@
 <!DOCTYPE html>
-<html lang="ko">
-
+<html lang="ko" data-bs-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>socialLogin</title>
-</head>
-
-<body>
-  <button id="googleLogin">구글 아이디로 로그인</button>
-
-  <form>
-    핸드폰 번호 : <input id="phoneNumber" />
-    <button id="phoneNumberButton">핸드폰 번호 전송</button>
-  </form>
-
-  <form>
-    확인 코드 : <input id="confirmCode" />
-    <button id="confirmCodeButton">확인 코드 전송</button>
-  </form>
-
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.9.2/firebase-analytics.js";
-    import {
-      getAuth,
-      signInWithPopup,
-      GoogleAuthProvider,
-      signInWithPhoneNumber,
-      RecaptchaVerifier,
-    } from "https://www.gstatic.com/firebasejs/9.9.2/firebase-auth.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyAxlXZTfOgO4ZrIfXp4t6sAjArTmMQrwuQ",
-      authDomain: "fitgirlviki.firebaseapp.com",
-      projectId: "fitgirlviki",
-      storageBucket: "fitgirlviki.firebasestorage.app",
-      messagingSenderId: "207468197936",
-      appId: "1:207468197936:web:70ea3baa845e40372255f5"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-
-    const provider = new GoogleAuthProvider();
-    const auth = getAuth();
-    auth.languageCode = "ko";
-
-    document.getElementById("googleLogin").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          const token = credential.accessToken;
-          const user = result.user;
-          console.log(result);
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          const email = error.customData.email;
-          const credential = GoogleAuthProvider.credentialFromError(error);
-          console.log(error);
-        });
-    });
-
-    // reCAPTCHA 설정
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      "phoneNumberButton",
-      {
-        size: "invisible",
-        callback: (response) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        },
-        'expired-callback': () => {
-          console.log('reCAPTCHA expired');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전화번호 인증</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
-      },
-      auth
-    );
+        .card-body { padding: 2rem; }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--bs-primary);
+        }
+        .btn-primary { padding: 0.6rem 1.5rem; }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 10px;
+        }
+        .alert {
+            margin-top: 1rem;
+            margin-bottom: 0;
+        }
+        #verification-form { transition: all 0.3s ease; }
+        .input-group-text { min-width: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">전화번호 인증</h2>
 
-    document.getElementById("phoneNumberButton").addEventListener("click", (event) => {
-      event.preventDefault();
+                        <!-- 전화번호 입력 -->
+                        <div id="phone-form" class="mb-3">
+                            <label for="phone" class="form-label">전화번호</label>
+                            <div class="input-group">
+                                <span class="input-group-text">+82</span>
+                                <input type="tel" class="form-control" id="phone" placeholder="1012345678">
+                            </div>
+                            <div class="form-text">국가 번호를 제외한 전화번호를 입력하세요</div>
+                            <button id="send-code" class="btn btn-primary mt-3 w-100">인증번호 전송</button>
+                        </div>
 
-      const phoneNumber = document.getElementById("phoneNumber").value;
-      const appVerifier = window.recaptchaVerifier;
+                        <!-- 인증번호 입력 -->
+                        <div id="verification-form" class="mb-3 d-none">
+                            <label for="verification-code" class="form-label">인증번호</label>
+                            <input type="text" class="form-control" id="verification-code" placeholder="6자리 코드 입력">
+                            <button id="verify-code" class="btn btn-success mt-3 w-100">인증하기</button>
+                            <button id="resend-code" class="btn btn-link mt-2 w-100">인증번호 재전송</button>
+                        </div>
 
-      signInWithPhoneNumber(auth, "+82" + phoneNumber, appVerifier)
-        .then((confirmationResult) => {
-          window.confirmationResult = confirmationResult;
-          console.log(confirmationResult);
-          alert('인증 코드가 발송되었습니다.');
-        })
-        .catch((error) => {
-          console.log(error);
-          alert('인증 코드 발송 실패: ' + error.message);
+                        <!-- 상태 메시지 -->
+                        <div id="status" class="alert d-none" role="alert"></div>
+
+                        <!-- 로딩 스피너 -->
+                        <div id="loading" class="text-center d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">로딩중...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxlXZTfOgO4ZrIfXp4t6sAjArTmMQrwuQ",
+            authDomain: "fitgirlviki.firebaseapp.com",
+            projectId: "fitgirlviki",
+            storageBucket: "fitgirlviki.firebasestorage.app",
+            messagingSenderId: "207468197936",
+            appId: "1:207468197936:web:70ea3baa845e40372255f5"
+        };
+
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+
+        // DOM 요소
+        const phoneForm = document.getElementById('phone-form');
+        const verificationForm = document.getElementById('verification-form');
+        const phoneInput = document.getElementById('phone');
+        const verificationCodeInput = document.getElementById('verification-code');
+        const sendCodeBtn = document.getElementById('send-code');
+        const verifyCodeBtn = document.getElementById('verify-code');
+        const resendCodeBtn = document.getElementById('resend-code');
+        const statusDiv = document.getElementById('status');
+        const loadingDiv = document.getElementById('loading');
+
+        let verificationId = '';
+
+        // 상태 메시지 표시
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `alert alert-${type}`;
+            statusDiv.classList.remove('d-none');
+        }
+
+        // 로딩 상태 토글
+        function toggleLoading(show) {
+            loadingDiv.classList.toggle('d-none', !show);
+            sendCodeBtn.disabled = show;
+            verifyCodeBtn.disabled = show;
+            resendCodeBtn.disabled = show;
+        }
+
+        // 전화번호 유효성 검사
+        function validatePhone(phone) {
+            const phoneRegex = /^[0-9]{10,11}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // 인증번호 전송
+        async function sendVerificationCode(phone) {
+            try {
+                toggleLoading(true);
+                const formattedPhone = `+82${phone}`;
+
+                const appVerifier = new firebase.auth.RecaptchaVerifier('send-code', {
+                    size: 'invisible',
+                    callback: () => {
+                        // reCAPTCHA 완료
+                    }
+                });
+
+                const confirmationResult = await firebase.auth().signInWithPhoneNumber(formattedPhone, appVerifier);
+                verificationId = confirmationResult.verificationId;
+
+                phoneForm.classList.add('d-none');
+                verificationForm.classList.remove('d-none');
+                showStatus('인증번호가 전송되었습니다!', 'success');
+            } catch (error) {
+                console.error('인증번호 전송 오류:', error);
+                showStatus(error.message, 'danger');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // 인증번호 확인
+        async function verifyCode(code) {
+            try {
+                toggleLoading(true);
+                const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
+                await firebase.auth().signInWithCredential(credential);
+                showStatus('전화번호가 성공적으로 인증되었습니다!', 'success');
+
+                // 인증 완료 후 폼 숨기기
+                verificationForm.classList.add('d-none');
+            } catch (error) {
+                console.error('인증번호 확인 오류:', error);
+                showStatus(error.message, 'danger');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // 이벤트 리스너
+        sendCodeBtn.addEventListener('click', () => {
+            const phone = phoneInput.value.trim();
+            if (!validatePhone(phone)) {
+                showStatus('올바른 전화번호를 입력해주세요', 'danger');
+                return;
+            }
+            sendVerificationCode(phone);
         });
-    });
 
-    document.getElementById("confirmCodeButton").addEventListener("click", (event) => {
-      event.preventDefault();
-      const code = document.getElementById("confirmCode").value;
-
-      window.confirmationResult.confirm(code)
-        .then((result) => {
-          const user = result.user;
-          console.log(result);
-          alert('인증 완료: ' + user.phoneNumber);
-        })
-        .catch((error) => {
-          console.log(error);
-          alert('인증 코드가 잘못되었습니다: ' + error.message);
+        verifyCodeBtn.addEventListener('click', () => {
+            const code = verificationCodeInput.value.trim();
+            if (!code || code.length !== 6) {
+                showStatus('올바른 6자리 인증번호를 입력해주세요', 'danger');
+                return;
+            }
+            verifyCode(code);
         });
-    });
-  </script>
+
+        resendCodeBtn.addEventListener('click', () => {
+            const phone = phoneInput.value.trim();
+            sendVerificationCode(phone);
+        });
+
+        // 인증 상태 변경 감지
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log('사용자 로그인됨:', user);
+            } else {
+                console.log('사용자 로그아웃됨');
+            }
+        });
+    </script>
 </body>
-
 </html>
