@@ -70,6 +70,14 @@
                             <div class="form-text">국가 번호를 제외한 전화번호를 입력하세요</div>
                             <button id="send-code" class="btn btn-primary mt-3 w-100">인증번호 전송</button>
                             <div id="recaptcha-container"></div> <!-- reCAPTCHA 컨테이너 -->
+                            
+                            <!-- 관리자 코드 입력 -->
+                            <div id="admin-form" class="mt-2" style="font-size: 0.9em;">
+                                <div class="input-group input-group-sm">
+                                    <input type="password" class="form-control form-control-sm" id="admin-code" placeholder="관리자 코드">
+                                    <button class="btn btn-secondary btn-sm" id="verify-admin">확인</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 인증번호 입력 -->
@@ -205,6 +213,32 @@
                 toggleLoading(false);
             }
         }
+
+        // 관리자 코드 확인
+        document.getElementById('verify-admin').addEventListener('click', () => {
+            const adminCode = document.getElementById('admin-code').value;
+            if (adminCode === '0000') {
+                // 모든 인증 관련 UI 숨기기
+                document.getElementById('admin-form').classList.add('d-none');
+                phoneForm.classList.add('d-none');
+                verificationForm.classList.add('d-none');
+                statusDiv.classList.add('d-none');
+
+                // 계약서 UI 표시
+                const contractsHtml = `
+                    <div id="contracts-form" class="text-center">
+                        <h3 class="mb-4">계약서 선택</h3>
+                        <div class="d-grid gap-3">
+                            <a href="membership.html" class="btn btn-primary btn-lg">회원가입계약서</a>
+                            <button class="btn btn-secondary btn-lg" disabled title="준비중">PT계약서 (준비중)</button>
+                            <button class="btn btn-secondary btn-lg" disabled title="준비중">일일권계약서 (준비중)</button>
+                        </div>
+                    </div>`;
+                document.querySelector('.card-body').innerHTML = contractsHtml;
+            } else {
+                showStatus('잘못된 관리자 코드입니다.', 'danger');
+            }
+        });
 
         // 이벤트 리스너
         sendCodeBtn.addEventListener('click', () => {
