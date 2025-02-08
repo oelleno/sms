@@ -414,7 +414,7 @@ function formatPhoneNumber(input) {
   input.value = value; // 변환된 값 설정
 }
 
-// 📌 오전오후체크
+// 📌 운동시간 체크
 function handleTimeSelect(select) {
   const checkbox = select.parentElement.querySelector('input[type="checkbox"][name="workout_time"]');
   if (select.value !== "") {
@@ -444,10 +444,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// 📌 입력 필드에서 자동 변환 적용
+// 📌 전화번호 입력 필드에서 자동 변환 적용
 document.addEventListener("DOMContentLoaded", function() {
   const phoneInput = document.getElementById("contact");
   if (phoneInput) {
+    // Get phone from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const phone = urlParams.get('phone');
+    if (phone) {
+      phoneInput.value = phone;
+      phoneInput.readOnly = true;
+      phoneInput.style.backgroundColor = '#f5f5f5';
+    }
+
     phoneInput.addEventListener("input", function() {
       formatPhoneNumber(this);
     });
@@ -455,139 +464,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-// 회원권 가격 자동입력 함수
-document.addEventListener("DOMContentLoaded", function() {
-  const membershipSelect = document.getElementById("membership");
-  const admissionFeeInput = document.getElementById("admission_fee");
-
-  // ✅ 1. 먼저 함수 정의
-  function updateAdmissionFee() {
-    if (!membershipSelect || !admissionFeeInput) return; // 요소가 없으면 실행 중단
-
-    let fee = 0;
-    if (membershipSelect.value === "New") {
-      fee = 33000;
-    }
-
-    admissionFeeInput.value = fee.toLocaleString("ko-KR"); // 한국식 콤마 표시
-    admissionFeeInput.style.backgroundColor = "#f5f5f5";
-    admissionFeeInput.readOnly = true;
-  }
-
-  // ✅ 2. 페이지 로드 시 기본 값 설정
-  if (membershipSelect) {
-    updateAdmissionFee(); // 페이지 로드 시 자동 적용
-    membershipSelect.addEventListener("change", updateAdmissionFee); // 변경 시 업데이트
-  }
-});
-
-
-function formatCurrency(input) {
-  let value = input.value.replace(/[^\d]/g, "");
-  value = new Intl.NumberFormat("ko-KR", {
-    style: "currency",
-    currency: "KRW",
-  }).format(value);
-  value = value.replace("₩", "").trim();
-  input.value = value;
-}
-
-function updateMembershipFee(select) {
-  const membershipFee = document.getElementById('membership_fee');
-  if (membershipFee) {
-    let fee = 0;
-    switch(parseInt(select.value)) {
-      case 1: fee = 99000; break;
-      case 2: fee = 154000; break;
-      case 3: fee = 198000; break;
-      case 6: fee = 297000; break;
-      case 12: fee = 429000; break;
-      default: fee = 0;
-    }
-    membershipFee.value = fee.toLocaleString('ko-KR');
-  }
-}
-
-function calculateTotal() {
-  const rentalPrice = parseInt(document.getElementById('rental_price').value.replace(/[^\d]/g, '') || 0);
-  const lockerPrice = parseInt(document.getElementById('locker_price').value.replace(/[^\d]/g, '') || 0);
-  const membershipFee = parseInt(document.getElementById('membership_fee').value.replace(/[^\d]/g, '') || 0);
-  const discount = parseInt(document.getElementById('discount').value.replace(/[^\d]/g, '') || 0);
-
-  const total = rentalPrice + lockerPrice + membershipFee - discount;
-  const totalAmount = document.getElementById('total_amount');
-  totalAmount.value = '₩ ' + total.toLocaleString('ko-KR');
-}
-
-function updateRentalPrice(select) {
-  const rentalPrice = document.getElementById('rental_price');
-  if (rentalPrice) {
-    if (select.value) {
-      const monthlyFee = 11000;
-      const total = parseInt(select.value) * monthlyFee;
-      rentalPrice.value = '₩ ' + total.toLocaleString('ko-KR');
-    } else {
-      rentalPrice.value = '₩ 0';
-    }
-    calculateTotal();
-  }
-}
-
-function updateLockerPrice(select) {
-  const lockerPrice = document.getElementById('locker_price');
-  if (lockerPrice) {
-    if (select.value) {
-      const monthlyFee = 11000;
-      const total = parseInt(select.value) * monthlyFee;
-      lockerPrice.value = '₩ ' + total.toLocaleString('ko-KR');
-    } else {
-      lockerPrice.value = '₩ 0';
-    }
-    calculateTotal();
-  }
-}
-
-function updateMembershipFee(select) {
-  const membershipFee = document.getElementById('membership_fee');
-  if (membershipFee) {
-    let fee = 0;
-    switch(parseInt(select.value)) {
-      case 1: fee = 99000; break;
-      case 2: fee = 154000; break;
-      case 3: fee = 198000; break;
-      case 6: fee = 297000; break;
-      case 12: fee = 429000; break;
-      default: fee = 0;
-    }
-    membershipFee.value = '₩ ' + fee.toLocaleString('ko-KR');
-    calculateTotal();
-  }
-}
-
-function formatMonths(input) {
-  let value = input.value.replace(/[^0-9]/g, '');
-  if (value) {
-    input.value = value + '개월';
-    if (input.id === 'membership_months') {
-      const membershipFee = document.getElementById('membership_fee');
-      if (membershipFee) {
-        let fee = 0;
-        switch(parseInt(value)) {
-          case 1: fee = 99000; break;
-          case 2: fee = 154000; break;
-          case 3: fee = 198000; break;
-          case 6: fee = 297000; break;
-          case 12: fee = 429000; break;
-          default: fee = 0;
-        }
-        membershipFee.value = fee.toLocaleString('ko-KR');
-        membershipFee.style.backgroundColor = '#f5f5f5';
-        membershipFee.readOnly = true;
-      }
-    }
-  }
-}
-
+// 📌 회원권 가격
 function updateAdmissionFee() {
   const membershipSelect = document.getElementById("membership");
   const admissionFeeInput = document.getElementById("admission_fee");
@@ -602,6 +479,67 @@ function updateAdmissionFee() {
   admissionFeeInput.value = fee.toLocaleString("ko-KR");
   admissionFeeInput.style.backgroundColor = "#f5f5f5";
   admissionFeeInput.readOnly = true;
+  calculateTotal(); // Added to update total on membership change
+}
+
+
+// 📌 운동복 가격
+function updateRentalPrice(select) {
+  const rentalPrice = document.getElementById('rental_price');
+  if (rentalPrice) {
+    if (select.value) {
+      const monthlyFee = 11000;
+      const total = parseInt(select.value) * monthlyFee;
+      rentalPrice.value = '₩ ' + total.toLocaleString('ko-KR');
+    } else {
+      rentalPrice.value = '₩ 0';
+    }
+    calculateTotal();
+  }
+}
+
+// 📌 라커 가격
+function updateLockerPrice(select) {
+  const lockerPrice = document.getElementById('locker_price');
+  if (lockerPrice) {
+    if (select.value) {
+      const monthlyFee = 11000;
+      const total = parseInt(select.value) * monthlyFee;
+      lockerPrice.value = '₩ ' + total.toLocaleString('ko-KR');
+    } else {
+      lockerPrice.value = '₩ 0';
+    }
+    calculateTotal();
+  }
+}
+
+// 📌 기간회비 가격
+function updateMembershipFee(select) {
+  const membershipFee = document.getElementById('membership_fee');
+  if (membershipFee) {
+    let fee = 0;
+    switch(parseInt(select.value)) {
+      case 1: fee = 99000; break;
+      case 2: fee = 154000; break;
+      case 3: fee = 198000; break;
+      case 6: fee = 297000; break;
+      case 12: fee = 429000; break;
+      default: fee = 0;
+    }
+    membershipFee.value = fee.toLocaleString('ko-KR');
+    calculateTotal(); // Added to update total on membership fee change
+  }
+}
+
+
+function formatCurrency(input) {
+  let value = input.value.replace(/[^\d]/g, "");
+  value = new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+  }).format(value);
+  value = value.replace("₩", "").trim();
+  input.value = value;
 }
 
 function showDiscountPopup() {
@@ -683,6 +621,7 @@ function showDiscountPopup() {
     `;
     deleteBtn.onclick = function() {
       row.remove();
+      calculateTotal(); // Added to recalculate total after removing a discount row
     };
 
     row.appendChild(select);
@@ -745,3 +684,34 @@ function showDiscountPopup() {
 
   addDiscountRow(); // Add first row by default
 }
+
+function calculateTotal() {
+  const admissionFee = parseInt(document.getElementById('admission_fee').value.replace(/[^\d]/g, '') || 0);
+  const rentalPrice = parseInt(document.getElementById('rental_price').value.replace(/[^\d]/g, '') || 0);
+  const lockerPrice = parseInt(document.getElementById('locker_price').value.replace(/[^\d]/g, '') || 0);
+  const membershipFee = parseInt(document.getElementById('membership_fee').value.replace(/[^\d]/g, '') || 0);
+  const discount = parseInt(document.getElementById('discount').value.replace(/[^\d]/g, '') || 0);
+
+  const total = admissionFee + rentalPrice + lockerPrice + membershipFee - discount;
+  const totalAmount = document.getElementById('total_amount');
+  totalAmount.value = '₩ ' + total.toLocaleString('ko-KR');
+  console.log(`🎯 Total Calculation: ${admissionFee} + ${rentalPrice} + ${lockerPrice} + ${membershipFee} - ${discount} = ${total}`);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const membershipSelect = document.getElementById('membership');
+  const rentalMonthsSelect = document.getElementById('rental_months');
+  const lockerMonthsSelect = document.getElementById('locker_months');
+  const membershipMonthsSelect = document.getElementById('membership_months');
+  const discountInput = document.getElementById('discount');
+
+  membershipSelect.addEventListener('change', updateAdmissionFee);
+  rentalMonthsSelect.addEventListener('change', () => updateRentalPrice(rentalMonthsSelect));
+  lockerMonthsSelect.addEventListener('change', () => updateLockerPrice(lockerMonthsSelect));
+  membershipMonthsSelect.addEventListener('change', () => updateMembershipFee(membershipMonthsSelect));
+  //Event Listener for Discount Input
+  discountInput.addEventListener('input', calculateTotal);
+
+  calculateTotal(); // Initial calculation
+
+});
