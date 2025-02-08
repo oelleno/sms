@@ -1,7 +1,8 @@
 
 // Firebase SDK 불러오기
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-storage.js";
 
 // Firebase 설정
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 // Firebase 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // 가입 완료 버튼 클릭 시 실행될 함수
 async function submitForm() {

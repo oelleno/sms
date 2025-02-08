@@ -42,12 +42,30 @@ function downloadAsImage() {
     localStorage.setItem(`signup_number_${dateStr}`, dailyNumber);
 
     // Create filename
-    const fileName = `${dateStr}${dailyNumber.toString().padStart(2, '0')}_회원가입계약서_${memberName}.jpg`;
+    const fileName = `${dateStr}_회원가입계약서_${memberName}.jpg`;
 
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/jpeg');
-    link.download = fileName;
-    link.click();
+    // Convert canvas to blob and upload to Firebase Storage
+    canvas.toBlob(async (blob) => {
+      try {
+        const { storage } = await import('./firebase.js');
+        const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/11.3.0/firebase-storage.js");
+        
+        const storageRef = ref(storage, `회원가입계약서/${fileName}`);
+        await uploadBytes(storageRef, blob);
+        console.log("Firebase Storage 업로드 완료!");
+        
+        // Get download URL and create local download
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("Firebase URL:", downloadURL);
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+      } catch (error) {
+        console.error("Firebase Storage 업로드 실패:", error);
+      }
+    }, 'image/jpeg');
 
     const overlay = document.createElement('div');
     overlay.style.cssText = `
