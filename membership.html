@@ -12,12 +12,13 @@
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/ckeditor.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="./pencheck.js"></script> <!-- ✏️ 형광펜 -->
   <script>
     function sample6_execDaumPostcode() {
       new daum.Postcode({
         oncomplete: function (data) {
           var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-          document.getElementById("sample6_address").value = addr;
+          document.getElementById("main_address").value = addr;
         }
       }).open();
     }
@@ -123,7 +124,7 @@
       <div class="section name-contact" style="margin-bottom: -5px;">
         <div>
           <p><i class="fas fa-user" style="margin-right: 5px;"></i>이름</p>
-          <input type="text" name="userid" id="userid" maxlength="20" class="thisbox">
+          <input type="text" name="name" id="name" maxlength="20" class="thisbox">
         </div>
         <div>
           <p><i class="fas fa-phone" style="margin-right: 5px;"></i>연락처</p>
@@ -138,7 +139,7 @@
         </div>
         <div class="birthdate-group">
           <p><i class="fas fa-calendar-alt" style="margin-right: 5px;"></i>생년월일</p>
-          <input type="text" name="userpw_re" id="userpw_re" maxlength="10" class="thisbox"
+          <input type="text" name="birthdate" id="birthdate" maxlength="10" class="thisbox"
             oninput="formatBirthdate(this)" placeholder="예: 20001010">
         </div>
       </div>
@@ -147,7 +148,7 @@
         <div style="flex: 1;">
           <p><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i>주소</p>
           <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" name="address" id="sample6_address" class="thisbox" style="margin-bottom: 0;" readonly>
+            <input type="text" name="address" id="main_address" class="thisbox" style="margin-bottom: 0;" readonly>
             <input type="button" value="주소 검색" onclick="sample6_execDaumPostcode()" class="address-search-btn"
               style="margin-top: 0; border-radius: 10px;">
           </div>
@@ -428,7 +429,7 @@
       </div>
 
       <div class="section signbox">
-        <p style="font-weight: bold; font-size: 14px;">본인은 위 계약내용을 <span class="dictation-text" data-text="모두 이해">모두 이해</span>하였고, 이에 <span class="dictation-text" data-text="동의">동의</span>하였습니다. 또한 본인 자필로 서명한 회원가입계약서 사본을 교부 받았음을 <span class="dictation-text" data-text="인정">인정</span>합니다.
+        <p style="font-weight: bold; font-size: 14px; margin-top: 4px;">본인은 위 계약내용을 <span class="dictation-text" data-text="모두 이해">모두 이해</span>하였고, 이에 <span class="dictation-text" data-text="동의">동의</span>하였습니다. 또한 본인 자필로 서명한 회원가입계약서 사본을 교부 받았음을 <span class="dictation-text" data-text="인정">인정</span>합니다.
 
         <div class="sign-date">
           <p style="font-size: 14px; font-weight: bold;"><select class="year" id="yearInput" style="font-size: 14px; font-weight: bold;"></select> 년
@@ -437,7 +438,7 @@
           </p>
         </div>
         <div>
-          <p style="margin: -30px 180px 5px 0px; text-align: right;">신청인 <p style="margin: -30px 20px 5px 0px; text-align: right;"><span class="dictation-text" data-text="(서명)" style="padding: 40px 110px; display: inline-block; position: relative;"><span style="position: absolute; bottom: 30px; right: 5px;">(서명)</span></span></p>
+          <p style="margin: -30px 180px 5px 0px; text-align: right;">신청인 <p style="margin: -28px 10px 0px 0px; text-align: right;"><span class="dictation-text" data-text="(서명)" style="padding: 30px 110px; display: inline-block; position: relative;"><span style="position: absolute; bottom: 30px; right: 5px;">(서명)</span></span></p>
           </div>
         </div>
       </div>

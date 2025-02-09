@@ -12,7 +12,7 @@ async function handleSubmit() {
 }
 
 function validateForm() {
-  const requiredFields = ['userid', 'contact', 'userpw_re', 'sample6_address', 'membership'];
+  const requiredFields = ['name', 'contact', 'userpw_re', 'main_address', 'membership'];
   for (const fieldId of requiredFields) {
     const field = document.getElementById(fieldId);
     if (!field || !field.value.trim()) {
@@ -35,37 +35,34 @@ function downloadAsImage() {
     const dateStr = year + month + day;
 
     // Get member name
-    const memberName = document.getElementById('userid').value;
+    const memberName = document.getElementById('name').value;
 
-    // Get current numbering (stored in localStorage)
-    let dailyNumber = parseInt(localStorage.getItem(`signup_number_${dateStr}`) || '0') + 1;
+    // Get daily number from localStorage with date check
+    const prevDate = localStorage.getItem('last_signup_date');
+    if (prevDate !== dateStr) {
+        localStorage.setItem('last_signup_date', dateStr);
+        localStorage.setItem(`signup_number_${dateStr}`, '0');
+    }
+    
+    let dailyNumber = (parseInt(localStorage.getItem(`signup_number_${dateStr}`) || '0') + 1).toString().padStart(3, '0');
     localStorage.setItem(`signup_number_${dateStr}`, dailyNumber);
-
-    // Create filename
-    const fileName = `${dateStr}_회원가입계약서_${memberName}.jpg`;
+    
+    // Create filename using new format (YYMMDD_001_이름)
+    const fileName = `${dateStr}_${dailyNumber}_${memberName}.jpg`;
 
     // Convert canvas to blob and upload to Firebase Storage
     canvas.toBlob(async (blob) => {
-      try {
-        const { storage } = await import('./firebase.js');
-        const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/11.3.0/firebase-storage.js");
-        
-        const storageRef = ref(storage, `회원가입계약서/${fileName}`);
-        await uploadBytes(storageRef, blob);
-        console.log("Firebase Storage 업로드 완료!");
-        
-        // Get download URL and create local download
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log("Firebase URL:", downloadURL);
-        
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
-      } catch (error) {
-        console.error("Firebase Storage 업로드 실패:", error);
-      }
-    }, 'image/jpeg');
+          try {
+            await window.uploadImage(fileName, blob);
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+          } catch (error) {
+            console.error("이미지 업로드 실패:", error);
+          }
+        }, 'image/jpeg');
 
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -280,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function sendit() {
-  const name = document.getElementById('userid'); // 이름
+  const name = document.getElementById('name'); // 이름
   const contact = document.getElementById('contact'); // 연락처
   const birthdate = document.getElementById('userpw_re'); // 생년월일
   const membership = document.getElementById('membership'); // 회원권 선택

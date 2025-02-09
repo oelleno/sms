@@ -202,7 +202,7 @@
                         <div class="d-grid gap-3">
                             <a href="membership.html?phone=${phoneInput.value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}" class="btn btn-primary btn-lg">회원가입계약서</a>
                             <button class="btn btn-secondary btn-lg" disabled title="준비중">PT계약서 (준비중)</button>
-                            <button class="btn btn-secondary btn-lg" disabled title="준비중">일권계약서 (준비중)</button>
+                            <button class="btn btn-secondary btn-lg" disabled title="준비중">일일권계약서 (준비중)</button>
                         </div>
                     </div>`;
                 document.querySelector('.card-body').innerHTML = contractsHtml;
@@ -214,8 +214,8 @@
             }
         }
 
-        // 관리자 코드 확인
-        document.getElementById('verify-admin').addEventListener('click', () => {
+        // 관리자 코드 확인 함수
+        function verifyAdmin() {
             const adminCode = document.getElementById('admin-code').value;
             if (adminCode === '0000') {
                 // 모든 인증 관련 UI 숨기기
@@ -238,7 +238,16 @@
             } else {
                 showStatus('잘못된 관리자 코드입니다.', 'danger');
             }
+        }
+
+        // 관리자 코드 Enter 키 이벤트
+        document.getElementById('admin-code').addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                verifyAdmin();
+            }
         });
+
+        document.getElementById('verify-admin').addEventListener('click', verifyAdmin);
 
         // 이벤트 리스너
         sendCodeBtn.addEventListener('click', () => {
